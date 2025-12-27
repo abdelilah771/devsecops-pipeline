@@ -15,8 +15,11 @@
 
 ## 🎥 Demo
 
-![Demo Video](https://github.com/user-attachments/assets/placeholder-video-link)
-*(Replace this link with your actual demo video or GIF)*
+<video src="demo_video.mp4" controls="controls" style="max-width: 100%;">
+  Your browser does not support the video tag.
+</video>
+
+*(Download the video [here](demo_video.mp4) if it doesn't play)*
 
 ## 🚀 Key Features
 
