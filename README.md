@@ -15,11 +15,9 @@
 
 ## 🎥 Demo
 
-<video src="demo_video.mp4" controls="controls" style="max-width: 100%;">
-  Your browser does not support the video tag.
-</video>
+[![Watch the Demo video](video_thumbnail.png)](https://github.com/abdelilah771/devsecops-pipeline/blob/main/demo_video.mp4?raw=true)
 
-*(Download the video [here](demo_video.mp4) if it doesn't play)*
+*(Click the image above to watch the full demo)*
 
 ## 🚀 Key Features
 
