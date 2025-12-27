@@ -13,6 +13,11 @@
 
 **SafeOps LogMiner** is a comprehensive DevSecOps solution that bridges the gap between CI/CD log data and actionable security insights. By leveraging advanced AI models and a microservices architecture, it automates the detection of security vulnerabilities within your build pipelines and suggests intelligent fixes, all visualized through a premium real-time dashboard.
 
+## 🎥 Demo
+
+![Demo Video](https://github.com/user-attachments/assets/placeholder-video-link)
+*(Replace this link with your actual demo video or GIF)*
+
 ## 🚀 Key Features
 
 *   **🔍 Centralized Log Collection**: Seamlessly ingests logs from major CI/CD platforms (GitHub Actions, GitLab CI, Jenkins).
