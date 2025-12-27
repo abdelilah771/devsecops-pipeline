@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Compliance Report - {{ request.project_name }}{% endblock %}
+
+{% block header %}Compliance Audit Report{% endblock %}
+
+{% block content %}
+<h2>Audit Summary</h2>
+<p>Project: {{ request.project_name }}</p>
+<p>Date: {{ request.run_id }}</p>
+
+<h2>Compliance Mapping</h2>
+<p>The following vulnerabilities map to standard compliance frameworks (OWASP/PCI-DSS/ISO27001).</p>
+
+<table>
+    <thead>
+        <tr>
+            <th>Vulnerability Category</th>
+            <th>Severity</th>
+            <th>Potential Compliance Impact</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for vuln in vulnerabilities %}
+        <tr>
+            <td>{{ vuln.category }}</td>
+            <td class="severity-{{ vuln.severity }}">{{ vuln.severity }}</td>
+            <td>
+                <!-- Simple Mock Logic for Compliance Mapping -->
+                {% if "Injection" in vuln.category %}
+                OWASP A03:2021, PCI-DSS 6.5.1
+                {% elif "Auth" in vuln.category or "Session" in vuln.category %}
+                OWASP A07:2021, PCI-DSS 8.2
+                {% elif "Exposure" in vuln.category %}
+                OWASP A02:2021, GDPR Art. 32
+                {% else %}
+                Review Required
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

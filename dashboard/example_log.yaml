@@ -1,0 +1,41 @@
+name: Production Build & Security Scan
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+
+    - name: Install Dependencies
+      run: npm ci
+
+    - name: Run Static Analysis (SAST)
+      run: |
+        echo "Running security scan..."
+        # Simulating a vulnerability find
+        echo "WARNING: Hardcoded password found in config.js: line 42"
+        echo "CRITICAL: SQL Injection vulnerability in query_builder.py"
+
+    - name: Build Application
+      run: npm run build
+      env:
+        # Intentionally bad practice for testing parser detection
+        AWS_ACCESS_KEY_ID: "AKIAIOSFODNN7EXAMPLE" 
+        AWS_SECRET_ACCESS_KEY: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+
+  deploy:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Staging
+        run: echo "Deploying to staging server..."

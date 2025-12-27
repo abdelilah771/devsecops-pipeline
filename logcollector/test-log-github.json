@@ -1,0 +1,12 @@
+{
+  "log_data": {
+    "level": "error",
+    "message": "Database connection failed",
+    "details": "Unable to establish connection to PostgreSQL database on port 5432."
+  },
+  "repo_name": "backend-service",
+  "author": "dev-team",
+  "pipeline_name": "production-deploy",
+  "run_id": "run-456789",
+  "timestamp_original": "2025-10-23T10:00:00Z"
+}

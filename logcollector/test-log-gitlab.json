@@ -1,0 +1,14 @@
+{
+  "log_data": {
+    "pipeline_id": "98765",
+    "job_name": "build",
+    "job_status": "passed",
+    "commit_sha": "abc123def456",
+    "branch": "main"
+  },
+  "repo_name": "mygroup/myproject",
+  "author": "gitlab-ci",
+  "pipeline_name": "Build Pipeline",
+  "run_id": "98765",
+  "timestamp_original": "2025-10-23T10:05:00Z"
+}

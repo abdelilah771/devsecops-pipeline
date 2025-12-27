@@ -1,0 +1,6 @@
+{
+    "provider": "GITHUB",
+    "repo_name": "safeops/logminer",
+    "pipeline_name": "ci-build",
+    "log": "Job: build\nStep: Checkout\nuses: actions/checkout@latest\nAWS_ACCESS_KEY_ID=AKIA1234SECRET\n"
+}

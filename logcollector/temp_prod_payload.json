@@ -1,0 +1,6 @@
+{
+    "provider": "GITHUB",
+    "repo_name": "prod-repo",
+    "pipeline_name": "prod-pipeline",
+    "log": "Raw log data here"
+}

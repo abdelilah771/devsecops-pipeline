@@ -1,0 +1,5 @@
+{
+    "provider": "github",
+    "scenario": "clean",
+    "repo_name": "test-repo-json-file"
+}

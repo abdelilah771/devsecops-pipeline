@@ -1,0 +1,200 @@
+version: '3.8'
+
+services:
+  # Infrastructure Services
+  postgres:
+    image: postgres:15-alpine
+    container_name: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: vulndetec
+    ports:
+      - "5432:5432"
+    networks:
+      - app_network
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    networks:
+      - app_network
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "-q", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - app_network
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  minio:
+    image: minio/minio
+    container_name: minio
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin123
+    networks:
+      - app_network
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  # Application Services
+  logcollector:
+    build:
+      context: ./logcollector
+      dockerfile: Dockerfile
+    container_name: logcollector
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - LOGPARSER_URL=http://logparser:8000
+      # Using the existing .env file for MongoDB URI (Atlas)
+      # If you wish to use a local MongoDB, uncomment the mongo service below and update the URI here
+    env_file:
+      - ./logcollector/.env
+    networks:
+      - app_network
+    depends_on:
+      - logparser
+
+  logparser:
+    build:
+      context: ./logparser
+      dockerfile: Dockerfile
+    container_name: logparser
+    ports:
+      - "8001:8000"
+    environment:
+      - PORT=8000
+      - RABBITMQ_HOST=rabbitmq
+    env_file:
+      - ./logparser/.env
+    networks:
+      - app_network
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  vulndetector:
+    build:
+      context: ./vulndetcteur
+      dockerfile: Dockerfile
+    container_name: vulndetector
+    ports:
+      - "8002:8000"
+    environment:
+      - PORT=8000
+      - POSTGRES_URI=postgresql://postgres:root@postgres:5432/vulndetec
+      - RABBITMQ_HOST=rabbitmq
+      - REDIS_HOST=redis
+    env_file:
+      - ./vulndetcteur/.env
+    networks:
+      - app_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  fixsuggester:
+    build:
+      context: ./FixSuggester
+      dockerfile: Dockerfile
+    container_name: fixsuggester
+    ports:
+      - "8003:8000"
+    environment:
+      - PORT=8000
+      - POSTGRES_URI=postgresql://postgres:root@postgres:5432/vulndetec
+      - REDIS_HOST=redis
+    env_file:
+      - ./FixSuggester/.env
+    networks:
+      - app_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  reportgenerator:
+    build:
+      context: ./ReportGenerator
+      dockerfile: Dockerfile
+    container_name: reportgenerator
+    ports:
+      - "8005:8000"
+    environment:
+      - PORT=8000
+      - POSTGRES_URI=postgresql://postgres:root@postgres:5432/vulndetec
+      - MINIO_ENDPOINT=minio:9000
+      - RABBITMQ_HOST=rabbitmq
+      - REDIS_HOST=redis
+    env_file:
+      - ./ReportGenerator/.env
+    networks:
+      - app_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  dashboard:
+    build:
+      context: ./dashboard
+      dockerfile: Dockerfile
+    container_name: dashboard
+    ports:
+      - "8080:80"
+    networks:
+      - app_network
+
+networks:
+  app_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  minio_data:

@@ -1,0 +1,14 @@
+{
+  "log_data": {
+    "build_number": "42",
+    "job_name": "deploy-prod",
+    "build_status": "SUCCESS",
+    "build_url": "http://jenkins.example.com/job/deploy-prod/42/",
+    "duration": "2m 15s"
+  },
+  "repo_name": "my-jenkins-job",
+  "author": "jenkins",
+  "pipeline_name": "Production Deployment",
+  "run_id": "build-42",
+  "timestamp_original": "2025-10-23T10:10:00Z"
+}

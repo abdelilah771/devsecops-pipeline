@@ -1,0 +1,7 @@
+[
+  "CICD-SEC-02: Over-Privileged Token",
+  "CICD-SEC-04: Poisoned Pipeline Execution",
+  "CICD-SEC-06: Secret Leak",
+  "CICD-SEC-07: Unpinned Action",
+  "CICD-SEC-08: 3rd Party Abuse"
+]

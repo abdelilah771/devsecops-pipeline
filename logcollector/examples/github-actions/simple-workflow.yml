@@ -1,0 +1,82 @@
+# Simple GitHub Actions workflow that sends logs to your server
+# Place this file in .github/workflows/ directory of your repository
+
+name: Send Build Logs
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-log:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tests
+        id: tests
+        run: npm test
+        continue-on-error: true
+
+      - name: Build project
+        id: build
+        run: npm run build
+        continue-on-error: true
+
+      - name: Send logs to LogMiner
+        if: always()
+        env:
+          LOGMINER_URL: https://YOUR_NGROK_URL.ngrok.io/logs/github
+        run: |
+          # Get test and build results
+          TEST_STATUS="${{ steps.tests.outcome }}"
+          BUILD_STATUS="${{ steps.build.outcome }}"
+
+          # Create JSON payload
+          LOG_PAYLOAD=$(cat <<EOF
+          {
+            "log_data": {
+              "workflow": "${{ github.workflow }}",
+              "job": "${{ github.job }}",
+              "event": "${{ github.event_name }}",
+              "branch": "${{ github.ref_name }}",
+              "commit_sha": "${{ github.sha }}",
+              "commit_message": "${{ github.event.head_commit.message }}",
+              "test_status": "${TEST_STATUS}",
+              "build_status": "${BUILD_STATUS}",
+              "overall_status": "${{ job.status }}"
+            },
+            "repo_name": "${{ github.repository }}",
+            "author": "${{ github.actor }}",
+            "pipeline_name": "${{ github.workflow }}",
+            "run_id": "${{ github.run_id }}",
+            "timestamp_original": "${{ github.event.head_commit.timestamp }}"
+          }
+          EOF
+          )
+
+          # Send to LogMiner
+          curl -X POST "${LOGMINER_URL}" \
+            -H "Content-Type: application/json" \
+            -d "${LOG_PAYLOAD}" \
+            --fail-with-body || echo "Failed to send logs to LogMiner"
+
+      - name: Display workflow summary
+        if: always()
+        run: |
+          echo "## Workflow Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- **Tests:** ${{ steps.tests.outcome }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Build:** ${{ steps.build.outcome }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Logs sent to SafeOps LogMiner:** ✅" >> $GITHUB_STEP_SUMMARY

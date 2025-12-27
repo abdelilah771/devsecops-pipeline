@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+redis
+asyncpg
+fastapi
+uvicorn
+redis
+asyncpg
+google-genai
+pydantic-settings
+python-dotenv
+pika

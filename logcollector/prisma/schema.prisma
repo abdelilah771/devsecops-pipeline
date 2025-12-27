@@ -1,0 +1,32 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Log {
+  id                 String    @id @default(auto()) @map("_id") @db.ObjectId
+  log_data           Json
+  repo_name          String
+  author             String
+  pipeline_name      String
+  run_id             String    @unique
+  timestamp_original DateTime? @db.Date
+  timestamp_received DateTime  @default(now()) @db.Date
+  provider           Provider
+
+  @@map("log")
+}
+
+enum Provider {
+  GITHUB
+  GITLAB
+  JENKINS
+  API
+}

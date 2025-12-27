@@ -1,0 +1,17 @@
+{
+  "model_name": "SafeOps-LogMiner Phase1 Risk Detector",
+  "version": "1.0.0",
+  "threshold": 0.5,
+  "required_columns": [
+    "log_text",
+    "provider",
+    "duration_seconds",
+    "num_lines",
+    "entropy",
+    "keyword_count"
+  ],
+  "output": [
+    "pred_label",
+    "risk_score"
+  ]
+}

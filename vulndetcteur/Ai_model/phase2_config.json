@@ -1,0 +1,20 @@
+{
+  "phase": 2,
+  "model_name": "VulnDetector Phase2 OWASP Classifier",
+  "version": "1.0.0",
+  "text_col": "log_text_clean",
+  "cat_cols": [
+    "provider"
+  ],
+  "num_cols": [
+    "duration_seconds",
+    "num_lines",
+    "entropy",
+    "keyword_count"
+  ],
+  "output": [
+    "owasp_category",
+    "confidence",
+    "top_candidates"
+  ]
+}

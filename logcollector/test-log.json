@@ -1,0 +1,13 @@
+{
+  "log_data": {
+    "level": "info",
+    "message": "Test log from curl",
+    "details": "This is a test to confirm the log collector is working."
+  },
+  "repo_name": "local-test-repo",
+  "author": "test-user",
+  "pipeline_name": "local-test",
+  "run_id": "local-run-123",
+  "timestamp_original": "2025-10-23T10:00:00Z",
+  "provider": "API"
+}

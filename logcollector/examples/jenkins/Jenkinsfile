@@ -1,0 +1,161 @@
+// Jenkins Pipeline that sends logs to your server
+// Place this file as 'Jenkinsfile' in your repository root
+
+pipeline {
+    agent any
+
+    environment {
+        LOGMINER_URL = 'https://YOUR_NGROK_URL.ngrok.io/logs/jenkins'
+        NODE_VERSION = '18'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                echo 'Checking out code...'
+                checkout scm
+            }
+            post {
+                always {
+                    script {
+                        sendLog('checkout', currentBuild.currentResult)
+                    }
+                }
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                echo 'Installing dependencies...'
+                sh 'npm install'
+            }
+            post {
+                always {
+                    script {
+                        sendLog('install', currentBuild.currentResult)
+                    }
+                }
+            }
+        }
+
+        stage('Test') {
+            steps {
+                echo 'Running tests...'
+                sh 'npm test'
+            }
+            post {
+                always {
+                    script {
+                        sendLog('test', currentBuild.currentResult)
+                    }
+                }
+            }
+        }
+
+        stage('Build') {
+            steps {
+                echo 'Building application...'
+                sh 'npm run build'
+            }
+            post {
+                always {
+                    script {
+                        sendLog('build', currentBuild.currentResult)
+                    }
+                }
+            }
+        }
+
+        stage('Deploy') {
+            when {
+                branch 'main'
+            }
+            steps {
+                echo 'Deploying to production...'
+                sh 'echo "Deploy commands here"'
+            }
+            post {
+                always {
+                    script {
+                        sendLog('deploy', currentBuild.currentResult)
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            echo 'Pipeline completed'
+            script {
+                sendFinalReport()
+            }
+        }
+        success {
+            echo 'Pipeline succeeded!'
+        }
+        failure {
+            echo 'Pipeline failed!'
+        }
+    }
+}
+
+// Helper function to send logs for each stage
+def sendLog(stageName, status) {
+    def logData = """
+    {
+        "log_data": {
+            "stage": "${stageName}",
+            "status": "${status}",
+            "build_number": "${env.BUILD_NUMBER}",
+            "job_name": "${env.JOB_NAME}",
+            "build_url": "${env.BUILD_URL}",
+            "node_name": "${env.NODE_NAME}",
+            "executor": "${env.EXECUTOR_NUMBER}"
+        },
+        "repo_name": "${env.JOB_NAME}",
+        "author": "${env.BUILD_USER ?: 'jenkins'}",
+        "pipeline_name": "Stage: ${stageName}",
+        "run_id": "${env.BUILD_ID}",
+        "timestamp_original": "${new Date().format('yyyy-MM-dd\'T\'HH:mm:ss\'Z\'', TimeZone.getTimeZone('UTC'))}"
+    }
+    """
+
+    sh """
+        curl -X POST '${LOGMINER_URL}' \
+            -H 'Content-Type: application/json' \
+            -d '${logData}' \
+            || echo 'Failed to send log for stage ${stageName}'
+    """
+}
+
+// Helper function to send final pipeline report
+def sendFinalReport() {
+    def duration = currentBuild.duration / 1000 // Convert to seconds
+    def logData = """
+    {
+        "log_data": {
+            "stage": "pipeline_complete",
+            "final_status": "${currentBuild.currentResult}",
+            "build_number": "${env.BUILD_NUMBER}",
+            "job_name": "${env.JOB_NAME}",
+            "build_url": "${env.BUILD_URL}",
+            "duration_seconds": ${duration},
+            "started_by": "${currentBuild.getBuildCauses()[0]?.shortDescription ?: 'unknown'}",
+            "changes": "${currentBuild.changeSets.size()} changes"
+        },
+        "repo_name": "${env.JOB_NAME}",
+        "author": "${env.BUILD_USER ?: 'jenkins'}",
+        "pipeline_name": "Pipeline Summary",
+        "run_id": "${env.BUILD_ID}",
+        "timestamp_original": "${new Date().format('yyyy-MM-dd\'T\'HH:mm:ss\'Z\'', TimeZone.getTimeZone('UTC'))}"
+    }
+    """
+
+    sh """
+        curl -X POST '${LOGMINER_URL}' \
+            -H 'Content-Type: application/json' \
+            -d '${logData}' \
+            || echo 'Failed to send final pipeline report'
+    """
+}

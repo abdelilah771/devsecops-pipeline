@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Executive Summary - {{ request.project_name }}{% endblock %}
+
+{% block header %}Executive Security Summary{% endblock %}
+
+{% block content %}
+<h2>Overview</h2>
+<p>This report provides a high-level overview of the security posture of <strong>{{ request.project_name }}</strong>.
+</p>
+
+<div style="display: flex; justify-content: space-between;">
+    <div class="metric-box">
+        <h3>Security Score</h3>
+        {# Determine color and text based on score #}
+        {% if metrics.security_score < 50 %} {% set score_class="text-danger" %} {% set score_text="Critical Risk" %} {%
+            elif metrics.security_score < 75 %} {% set score_class="text-warning" %} {% set score_text="High Risk" %} {%
+            else %} {% set score_class="text-success" %} {% set score_text="Good" %} {% endif %} <p
+            class="{{ score_class }}" style="font-size: 2em; font-weight: bold;">
+            {{ "%.1f"|format(metrics.security_score) }}/100
+            </p>
+            <p class="{{ score_class }}" style="font-weight: bold;">{{ score_text }}</p>
+    </div>
+    <div class="metric-box">
+        <h3>Total Vulnerabilities</h3>
+        <p style="font-size: 2em;">{{ metrics.total_vulnerabilities }}</p>
+    </div>
+</div>
+
+<h2>Key Risks</h2>
+<div class="chart-container">
+    {% if pie_chart %}
+    <img src="data:image/png;base64,{{ pie_chart }}" alt="Severity Distribution" width="400">
+    {% else %}
+    <p>No vulnerabilities found to display.</p>
+    {% endif %}
+</div>
+
+<h2>Top Priority Issues</h2>
+{% if vulnerabilities %}
+<ul>
+    {% for vuln in vulnerabilities[:3] %}
+    <li>
+        <span class="severity-{{ vuln.severity }}">{{ vuln.severity }}</span>:
+        {{ vuln.category }} - <b>{{ vuln.affected_component }}</b>
+    </li>
+    {% endfor %}
+</ul>
+{% if vulnerabilities|length > 3 %}
+<p><i>...and {{ vulnerabilities|length - 3 }} more issues. See Technical Report for details.</i></p>
+{% endif %}
+{% else %}
+<p>No priority issues detected.</p>
+{% endif %}
+
+<h2>Recommendations</h2>
+<p>Focus on remediating the Critical and High severity issues to improve the security score above 75.</p>
+{% endblock %}
