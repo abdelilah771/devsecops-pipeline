@@ -1,11 +1,7 @@
 pipeline {
     agent any
 
-    environment {
-        // Define any global environment variables here if needed
-        // Note: .env files are respected by the containers at runtime, not build time usually
-        // unless explicitly used in Dockerfile (e.g. ARG)
-    }
+
 
     stages {
         stage('Checkout') {
@@ -83,6 +79,7 @@ pipeline {
             echo 'Build failed. Please check logs.'
         }
         cleanup {
+            echo 'Cleaning up...'
             // Optional: Prune dangling images to save space
             // sh 'docker image prune -f'
         }
