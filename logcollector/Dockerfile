@@ -8,6 +8,7 @@ COPY package*.json ./
 # Install all dependencies including devDependencies (if any needed for build)
 # Using ci for reproducible builds
 RUN npm ci
+COPY prisma ./prisma
 RUN npx prisma generate
 
 COPY . .
